@@ -19,8 +19,26 @@ library(ggrepel)
 ## Load Data
 
 ```{r}
-Bites <- read_csv(here("Data", "Bite_Rates.csv"))
+Bites <- read_csv(here("Data", "Bite_Rates.csv")) %>%
+  mutate(across(everything(), ~replace(., is.na(.), 0))) %>%
+  mutate(Total_Bites = Coral_Bites + Rubble_Bites + Sand_Bites + Turf_Bites + Macro_Bites + CCA_Bites + Sponge_Bites) %>%
+  mutate(Bites_per_min = case_when(
+    Species %in% c("A triostegus",  "C spilurus") ~ Total_Bites / 3,
+    Species == "Z cornutus" ~ Total_Bites / 7))
+
+
+
+
+Flats_Bites <- Bites %>%
+  filter(Location == "F")
+
+Slope_Bites <- Bites %>%
+  filter(Location == "S")
+
 
 view(Bites)
+view(Flats_Bites)
+view(Slope_Bites)
 ```
+
 
