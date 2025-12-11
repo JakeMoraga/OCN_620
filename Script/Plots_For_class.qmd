@@ -1,0 +1,26 @@
+---
+title: "Plots"
+format: html
+---
+
+## Load Libraries
+
+```{r}
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(here)
+library(ggrepel)
+```
+
+
+
+## Load Data
+
+```{r}
+Bites <- read_csv(here("Data", "Bite_Rates.csv"))
+
+view(Bites)
+```
+
