@@ -11,7 +11,8 @@ format: html
 
 library(tidyverse)
 library(here)
-library(ggrepel)
+library(ggpubr)
+library(patchwork)
 ```
 
 
@@ -19,6 +20,9 @@ library(ggrepel)
 ## Load Data
 
 ```{r}
+#| warning: false
+#| message: false
+
 Bites <- read_csv(here("Data", "Bite_Rates.csv")) %>%
   mutate(across(everything(), ~replace(., is.na(.), 0))) %>%
   mutate(Total_Bites = Coral_Bites + Rubble_Bites + Sand_Bites + Turf_Bites + Macro_Bites + CCA_Bites + Sponge_Bites) %>%
@@ -27,7 +31,7 @@ Bites <- read_csv(here("Data", "Bite_Rates.csv")) %>%
     Species == "Z cornutus" ~ Total_Bites / 7))
 
 
-
+# These are for when all of the transect data is inputted so we can run a Strauss Selectivity Test
 
 Flats_Bites <- Bites %>%
   filter(Location == "F")
@@ -35,10 +39,49 @@ Flats_Bites <- Bites %>%
 Slope_Bites <- Bites %>%
   filter(Location == "S")
 
+Lagoon_Bites <- Bites %>%
+  filter(Location == "L")
+
 
 view(Bites)
 view(Flats_Bites)
 view(Slope_Bites)
+view(Lagoon_Bites)
 ```
 
+
+## Lets make a plot
+
+```{r}
+#| warning: false
+#| message: false
+
+LR1 <- ggplot(data = Bites, mapping = aes(x = Size, y = Bites_per_min)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "cyan3", fill = "aquamarine") +
+     stat_regline_equation(
+    aes(label = ..eq.label..),
+    label.x = 14, 
+    label.y = 65 ) +
+    stat_cor(
+    aes(label = ..rr.label..),
+    label.x = 14,
+    label.y = 60) +
+  facet_wrap(~ Species)
+
+LR2 <- ggplot(data = Bites, mapping = aes(x = Size, y = Bites_per_min)) +
+  geom_point(aes(color = Species)) +
+  geom_smooth(method = "lm", se = TRUE, color = "cyan3", fill = "aquamarine") +
+     stat_regline_equation(
+    aes(label = ..eq.label..),
+    label.x = 14, 
+    label.y = 65 ) +
+    stat_cor(
+    aes(label = ..rr.label..),
+    label.x = 14,
+    label.y = 60)
+
+LR1
+LR2
+```
 
