@@ -30,6 +30,31 @@ Bites <- read_csv(here("Data", "Bite_Rates.csv")) %>%
     Species %in% c("A triostegus",  "C spilurus") ~ Total_Bites / 3,
     Species == "Z cornutus" ~ Total_Bites / 7))
 
+#######################################
+
+Transects_raw<- read_csv(here("Data", "Transects.csv")) # read in transect data
+substrate_availability<- Transects_raw %>% 
+  # Select only the columns we need (column 12 has location names, 13-19 have percentages)
+  # Use backticks ` ` because column names have spaces and % symbols
+  select(Location = `...12`, # Column 12 (unnamed, so R calls it ...12) has "Slope", "Flat", "Lagoon"
+         Coral_Avail = `% coral`, # Rename to simpler names without spaces
+         Rubble_Avail = `% rubble`,
+         Sand_Avail = `% sand`,
+         Turf_Avail = `% turf`,
+         Macro_Avail = `% macro`,
+         CCA_Avail = `% CCA`,
+         Sponge_Avail = `% sponge`) %>%
+  filter(!is.na(Location)) %>% # Keep only rows where Location is not NA (removes all the empty rows)
+  mutate(Location = case_when(Location == "Slope" ~ "S", # Change location names to match the Bites data (S, F, L instead of Slope, Flat, Lagoon)
+                              Location == "Flat" ~ "F",
+                              Location == "Lagoon" ~ "L"))
+# view(substrate_availability)
+
+#######################################
+
+Time_Foraging<- read_csv(here("Data", "Time Foraging.csv")) 
+
+
 
 # These are for when all of the transect data is inputted so we can run a Strauss Selectivity Test
 
@@ -83,5 +108,126 @@ LR2 <- ggplot(data = Bites, mapping = aes(x = Size, y = Bites_per_min)) +
 
 LR1
 LR2
+```
+
+# Strauss Selectivity Index
+
+```{r}
+#| warning: false
+#| message: false
+
+# Calculate Bite Proportions (What the fish are eating)
+# Strauss formula: L = r - p 
+# r = proportion of bites on each substrate (what they're eating)
+# p = proportion available (what's there) — we have this in substrate_availability
+
+# Calculate r
+bite_proportions<- Bites %>% 
+  group_by(Species, Age_Class, Location) %>%
+  summarise( # sum up all bites for each substrate type within each group
+    Coral_Bites = sum(Coral_Bites),
+    Rubble_Bites = sum(Rubble_Bites),
+    Sand_Bites = sum(Sand_Bites),
+    Turf_Bites = sum(Turf_Bites),
+    Macro_Bites = sum(Macro_Bites),
+    CCA_Bites = sum(CCA_Bites),
+    Sponge_Bites = sum(Sponge_Bites),
+  Total_Bites = sum(Total_Bites), # calculate total bites acros all substrates 
+  n_observations = n()) %>% # count how many fish observations are in each group 
+  mutate( # calculate proportions = bites on substrate / total bites 
+    Coral_Prop = (Coral_Bites / Total_Bites) * 100, # multiply by 100 to get % to match substrate_availability
+    Rubble_Prop = (Rubble_Bites / Total_Bites) * 100,
+    Sand_Prop = (Sand_Bites / Total_Bites) * 100,
+    Turf_Prop = (Turf_Bites / Total_Bites) * 100,
+    Macro_Prop = (Macro_Bites / Total_Bites) * 100,
+    CCA_Prop = (CCA_Bites / Total_Bites) * 100,
+    Sponge_Prop = (Sponge_Bites / Total_Bites) * 100)
+
+#view(bite_proportions)
+
+# Join Bite Proportions with substrate availability
+
+strauss_data<- bite_proportions %>%
+  left_join(substrate_availability, by = "Location") # connect two tables by "location" column 
+# keep all rows from bite_proportions and add matching columns from substrate_availability
+#view(strauss_data)
+
+# Calculate L (strauss slectivity index) for each substrate
+# L = r - p
+# L = proportion of bites (what they ate) - proportion available (what was there)
+
+strauss_results<- strauss_data %>%
+  mutate(Coral_L = Coral_Prop - Coral_Avail,
+         Rubble_L = Rubble_Prop - Rubble_Avail,
+         Sand_L = Sand_Prop - Sand_Avail,
+         Turf_L = Turf_Prop - Turf_Avail,
+         Macro_L = Macro_Prop - Macro_Avail,
+         CCA_L = CCA_Prop - CCA_Avail,
+         Sponge_L = Sponge_Prop - Sponge_Avail)
+strauss_results %>%
+  select(Species, Age_Class, Location, # look at just selectivity results (L values)
+         Coral_L, Rubble_L, Sand_L, Turf_L, Macro_L, CCA_L, Sponge_L)
+
+# For reference: -value means fish avoid, +value means fish prefer
+```
+
+Interpreting Results
+Positive = preference, Negative = avoidance
+A triostegus:
+
+**Loves** turf algae! Juveniles in the Flats have a selectivity of +90.4! 
+Avoids coral and sand (all negative values)
+Adults also like rubble in Flats (+69.1)
+
+C spilurus:
+
+Juveniles love turf (+85.4 in Flats)
+Adults are more variable — prefer rubble on Slope (+66.9), turf in Lagoon (+41.4), and even sand in Flats (+17.4)
+Adults on Slope strongly avoid turf (-15.0) 
+
+Z cornutus:
+
+Adults on Slope love sponge! (+52.2) 
+Juveniles also eat sponge more than expected (+25.6 on Slope, +13.6 in Lagoon)
+Juveniles in Lagoon prefer rubble (+46.5)
+All groups avoid coral (all negative)
+
+# Strauss Plot
+```{r}
+#| warning: false
+#| message: false
+
+# reshape data into long format for ggplot
+strauss_long<- strauss_results%>%
+  select(Species, Age_Class, Location,# select columns for plot
+         Coral_L, Rubble_L, Sand_L, Turf_L, Macro_L, CCA_L, Sponge_L) %>%
+  pivot_longer(cols = Coral_L:Sponge_L,# columns to resshape
+               names_to = "Substrate", # new column name for substrate types
+               values_to = "Selectivity") %>% # new column name for L values 
+  mutate(Substrate = str_replace(Substrate, "_L", "")) %>% # clean substrate names ( remove "_L" from end of name)
+  mutate(Location = case_when( # change location codes to full names for plot 
+    Location == "F" ~ "Flats",
+    Location == "L" ~ "Lagoon",
+    Location == "S" ~ "Slope"))
+
+# Plot
+
+strauss_plot<- ggplot(data = strauss_long, # plot data 
+                      aes(x = Substrate,
+                          y = Selectivity,
+                          fill = Substrate)) +
+  geom_col()+ # bar plot
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black")+ # add horizontal reference line at 0 
+  facet_grid(Species + Age_Class ~ Location)+ # create separate panels for each species and age class 
+  scale_fill_viridis_d(option = "mako")+ # color blind friendly 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ # rotate axis labels
+  labs(title = "Strauss Selectivity Index by Species, Age Class, and Location",
+       subtitle = "Positive values = preference, Negative values = avoidance",
+       x = "Substrate Type",
+       y = "Selectivity Index (L)",
+       fill = "Substrate")
+strauss_plot
+
+ggsave(here("output", "strauss_plot.png"))
 ```
 

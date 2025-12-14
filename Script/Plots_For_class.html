@@ -66,7 +66,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="Plots_For_class_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="Plots_For_class_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="Plots_For_class_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="Plots_For_class_files/libs/bootstrap/bootstrap-1bc8a17f135ab3d594c857e9f48e611b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="Plots_For_class_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -115,23 +115,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Species <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"A triostegus"</span>,  <span class="st">"C spilurus"</span>) <span class="sc">~</span> Total_Bites <span class="sc">/</span> <span class="dv">3</span>,</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Species <span class="sc">==</span> <span class="st">"Z cornutus"</span> <span class="sc">~</span> Total_Bites <span class="sc">/</span> <span class="dv">7</span>))</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># These are for when all of the transect data is inputted so we can run a Strauss Selectivity Test</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Flats_Bites <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Location <span class="sc">==</span> <span class="st">"F"</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Slope_Bites <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Location <span class="sc">==</span> <span class="st">"S"</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>Lagoon_Bites <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Location <span class="sc">==</span> <span class="st">"L"</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Bites)</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Flats_Bites)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Slope_Bites)</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Lagoon_Bites)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">#######################################</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>Transects_raw<span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"Transects.csv"</span>)) <span class="co"># read in transect data</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>substrate_availability<span class="ot">&lt;-</span> Transects_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Select only the columns we need (column 12 has location names, 13-19 have percentages)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use backticks ` ` because column names have spaces and % symbols</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">Location =</span> <span class="st">`</span><span class="at">...12</span><span class="st">`</span>, <span class="co"># Column 12 (unnamed, so R calls it ...12) has "Slope", "Flat", "Lagoon"</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">Coral_Avail =</span> <span class="st">`</span><span class="at">% coral</span><span class="st">`</span>, <span class="co"># Rename to simpler names without spaces</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">Rubble_Avail =</span> <span class="st">`</span><span class="at">% rubble</span><span class="st">`</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">Sand_Avail =</span> <span class="st">`</span><span class="at">% sand</span><span class="st">`</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">Turf_Avail =</span> <span class="st">`</span><span class="at">% turf</span><span class="st">`</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">Macro_Avail =</span> <span class="st">`</span><span class="at">% macro</span><span class="st">`</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">CCA_Avail =</span> <span class="st">`</span><span class="at">% CCA</span><span class="st">`</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">Sponge_Avail =</span> <span class="st">`</span><span class="at">% sponge</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Location)) <span class="sc">%&gt;%</span> <span class="co"># Keep only rows where Location is not NA (removes all the empty rows)</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Location =</span> <span class="fu">case_when</span>(Location <span class="sc">==</span> <span class="st">"Slope"</span> <span class="sc">~</span> <span class="st">"S"</span>, <span class="co"># Change location names to match the Bites data (S, F, L instead of Slope, Flat, Lagoon)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>                              Location <span class="sc">==</span> <span class="st">"Flat"</span> <span class="sc">~</span> <span class="st">"F"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>                              Location <span class="sc">==</span> <span class="st">"Lagoon"</span> <span class="sc">~</span> <span class="st">"L"</span>))</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># view(substrate_availability)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="do">#######################################</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>Time_Foraging<span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"Time Foraging.csv"</span>)) </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># These are for when all of the transect data is inputted so we can run a Strauss Selectivity Test</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>Flats_Bites <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Location <span class="sc">==</span> <span class="st">"F"</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>Slope_Bites <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Location <span class="sc">==</span> <span class="st">"S"</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>Lagoon_Bites <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Location <span class="sc">==</span> <span class="st">"L"</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Bites)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Flats_Bites)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Slope_Bites)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="fu">view</span>(Lagoon_Bites)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="lets-make-a-plot" class="level2">
@@ -175,6 +200,131 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div>
 <figure class="figure">
 <p><img src="Plots_For_class_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="strauss-selectivity-index" class="level1">
+<h1>Strauss Selectivity Index</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate Bite Proportions (What the fish are eating)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Strauss formula: L = r - p </span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># r = proportion of bites on each substrate (what they're eating)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># p = proportion available (what's there) — we have this in substrate_availability</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate r</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>bite_proportions<span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span> </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Species, Age_Class, Location) <span class="sc">%&gt;%</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="co"># sum up all bites for each substrate type within each group</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Coral_Bites =</span> <span class="fu">sum</span>(Coral_Bites),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Rubble_Bites =</span> <span class="fu">sum</span>(Rubble_Bites),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sand_Bites =</span> <span class="fu">sum</span>(Sand_Bites),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">Turf_Bites =</span> <span class="fu">sum</span>(Turf_Bites),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">Macro_Bites =</span> <span class="fu">sum</span>(Macro_Bites),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">CCA_Bites =</span> <span class="fu">sum</span>(CCA_Bites),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sponge_Bites =</span> <span class="fu">sum</span>(Sponge_Bites),</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">Total_Bites =</span> <span class="fu">sum</span>(Total_Bites), <span class="co"># calculate total bites acros all substrates </span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_observations =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> <span class="co"># count how many fish observations are in each group </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>( <span class="co"># calculate proportions = bites on substrate / total bites </span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">Coral_Prop =</span> (Coral_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>, <span class="co"># multiply by 100 to get % to match substrate_availability</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">Rubble_Prop =</span> (Rubble_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sand_Prop =</span> (Sand_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">Turf_Prop =</span> (Turf_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">Macro_Prop =</span> (Macro_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">CCA_Prop =</span> (CCA_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sponge_Prop =</span> (Sponge_Bites <span class="sc">/</span> Total_Bites) <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#view(bite_proportions)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Join Bite Proportions with substrate availability</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>strauss_data<span class="ot">&lt;-</span> bite_proportions <span class="sc">%&gt;%</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(substrate_availability, <span class="at">by =</span> <span class="st">"Location"</span>) <span class="co"># connect two tables by "location" column </span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co"># keep all rows from bite_proportions and add matching columns from substrate_availability</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="co">#view(strauss_data)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate L (strauss slectivity index) for each substrate</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="co"># L = r - p</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="co"># L = proportion of bites (what they ate) - proportion available (what was there)</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>strauss_results<span class="ot">&lt;-</span> strauss_data <span class="sc">%&gt;%</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Coral_L =</span> Coral_Prop <span class="sc">-</span> Coral_Avail,</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">Rubble_L =</span> Rubble_Prop <span class="sc">-</span> Rubble_Avail,</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>         <span class="at">Sand_L =</span> Sand_Prop <span class="sc">-</span> Sand_Avail,</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>         <span class="at">Turf_L =</span> Turf_Prop <span class="sc">-</span> Turf_Avail,</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>         <span class="at">Macro_L =</span> Macro_Prop <span class="sc">-</span> Macro_Avail,</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>         <span class="at">CCA_L =</span> CCA_Prop <span class="sc">-</span> CCA_Avail,</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>         <span class="at">Sponge_L =</span> Sponge_Prop <span class="sc">-</span> Sponge_Avail)</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>strauss_results <span class="sc">%&gt;%</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Species, Age_Class, Location, <span class="co"># look at just selectivity results (L values)</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>         Coral_L, Rubble_L, Sand_L, Turf_L, Macro_L, CCA_L, Sponge_L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 13 × 10
+# Groups:   Species, Age_Class [6]
+   Species     Age_Class Location Coral_L Rubble_L Sand_L Turf_L Macro_L   CCA_L
+   &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;      &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 A triosteg… Adult     F          -36.4    69.1   -40.6   8.76   0     -0.833 
+ 2 A triosteg… Adult     L          -11.8    10.7   -40.4  37.2    6.87  -2.5   
+ 3 A triosteg… Juvenile  F          -36.7   -12.4   -40.8  90.4    0     -0.572 
+ 4 A triosteg… Juvenile  L          -12.3    11.8   -39.7  44.5   -1.84  -2.5   
+ 5 C spilurus  Adult     F          -36.7    29.3    17.4  -9.17   0     -0.833 
+ 6 C spilurus  Adult     L          -10.5     1.57  -27.9  41.4   -2.13  -2.5   
+ 7 C spilurus  Adult     S          -26.1    66.9   -12.5 -15     -4.17  -5.83  
+ 8 C spilurus  Juvenile  F          -33.4   -10.8   -40.8  85.4    0.456 -0.833 
+ 9 C spilurus  Juvenile  L          -12.1    11.6   -34.0  39.2   -2.5   -2.22  
+10 Z cornutus  Adult     L          -12.5   -14.2   -40.8  72.5   -2.5   -2.5   
+11 Z cornutus  Adult     S          -35.8    -1.67  -13.3   4.44  -4.17  -1.67  
+12 Z cornutus  Juvenile  L          -11.7    46.5   -39.6  -6.31  -2.5   -0.0309
+13 Z cornutus  Juvenile  S          -44.2    -7.62  -13.3  49.5   -4.17  -5.83  
+# ℹ 1 more variable: Sponge_L &lt;dbl&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For reference: -value means fish avoid, +value means fish prefer</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Interpreting Results Positive = preference, Negative = avoidance A triostegus:</p>
+<p><strong>Loves</strong> turf algae! Juveniles in the Flats have a selectivity of +90.4! Avoids coral and sand (all negative values) Adults also like rubble in Flats (+69.1)</p>
+<p>C spilurus:</p>
+<p>Juveniles love turf (+85.4 in Flats) Adults are more variable — prefer rubble on Slope (+66.9), turf in Lagoon (+41.4), and even sand in Flats (+17.4) Adults on Slope strongly avoid turf (-15.0)</p>
+<p>Z cornutus:</p>
+<p>Adults on Slope love sponge! (+52.2) Juveniles also eat sponge more than expected (+25.6 on Slope, +13.6 in Lagoon) Juveniles in Lagoon prefer rubble (+46.5) All groups avoid coral (all negative)</p>
+</section>
+<section id="strauss-plot" class="level1">
+<h1>Strauss Plot</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># reshape data into long format for ggplot</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>strauss_long<span class="ot">&lt;-</span> strauss_results<span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Species, Age_Class, Location,<span class="co"># select columns for plot</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>         Coral_L, Rubble_L, Sand_L, Turf_L, Macro_L, CCA_L, Sponge_L) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> Coral_L<span class="sc">:</span>Sponge_L,<span class="co"># columns to resshape</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"Substrate"</span>, <span class="co"># new column name for substrate types</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"Selectivity"</span>) <span class="sc">%&gt;%</span> <span class="co"># new column name for L values </span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Substrate =</span> <span class="fu">str_replace</span>(Substrate, <span class="st">"_L"</span>, <span class="st">""</span>)) <span class="sc">%&gt;%</span> <span class="co"># clean substrate names ( remove "_L" from end of name)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Location =</span> <span class="fu">case_when</span>( <span class="co"># change location codes to full names for plot </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    Location <span class="sc">==</span> <span class="st">"F"</span> <span class="sc">~</span> <span class="st">"Flats"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    Location <span class="sc">==</span> <span class="st">"L"</span> <span class="sc">~</span> <span class="st">"Lagoon"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    Location <span class="sc">==</span> <span class="st">"S"</span> <span class="sc">~</span> <span class="st">"Slope"</span>))</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>strauss_plot<span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> strauss_long, <span class="co"># plot data </span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">aes</span>(<span class="at">x =</span> Substrate,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>                          <span class="at">y =</span> Selectivity,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>                          <span class="at">fill =</span> Substrate)) <span class="sc">+</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()<span class="sc">+</span> <span class="co"># bar plot</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>)<span class="sc">+</span> <span class="co"># add horizontal reference line at 0 </span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Species <span class="sc">+</span> Age_Class <span class="sc">~</span> Location)<span class="sc">+</span> <span class="co"># create separate panels for each species and age class </span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"mako"</span>)<span class="sc">+</span> <span class="co"># color blind friendly </span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))<span class="sc">+</span> <span class="co"># rotate axis labels</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Strauss Selectivity Index by Species, Age Class, and Location"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Positive values = preference, Negative values = avoidance"</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Substrate Type"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Selectivity Index (L)"</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Substrate"</span>)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>strauss_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Plots_For_class_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
