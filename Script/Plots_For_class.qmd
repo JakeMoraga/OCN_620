@@ -173,19 +173,20 @@ strauss_results %>%
 
 Interpreting Results
 Positive = preference, Negative = avoidance
-A triostegus:
 
-**Loves** turf algae! Juveniles in the Flats have a selectivity of +90.4! 
+**A triostegus**:
+
+Loves turf algae. Juveniles in the Flats have a selectivity of +90.4! 
 Avoids coral and sand (all negative values)
 Adults also like rubble in Flats (+69.1)
 
-C spilurus:
+**C spilurus**:
 
 Juveniles love turf (+85.4 in Flats)
 Adults are more variable — prefer rubble on Slope (+66.9), turf in Lagoon (+41.4), and even sand in Flats (+17.4)
 Adults on Slope strongly avoid turf (-15.0) 
 
-Z cornutus:
+**Z cornutus**:
 
 Adults on Slope love sponge! (+52.2) 
 Juveniles also eat sponge more than expected (+25.6 on Slope, +13.6 in Lagoon)
@@ -219,7 +220,7 @@ strauss_plot<- ggplot(data = strauss_long, # plot data
   geom_col()+ # bar plot
   geom_hline(yintercept = 0, linetype = "dashed", color = "black")+ # add horizontal reference line at 0 
   facet_grid(Species + Age_Class ~ Location)+ # create separate panels for each species and age class 
-  scale_fill_viridis_d(option = "mako")+ # color blind friendly 
+  scale_fill_viridis_d(option = "magma")+ # color blind friendly 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+ # rotate axis labels
   labs(title = "Strauss Selectivity Index by Species, Age Class, and Location",
        subtitle = "Positive values = preference, Negative values = avoidance",
@@ -230,4 +231,327 @@ strauss_plot
 
 ggsave(here("output", "strauss_plot.png"))
 ```
+
+# ANOVA
+
+```{r}
+# Let's see the mean bite rate for each species
+Bites %>%
+  group_by(Species) %>% # Group by species
+  summarise(mean_bites = mean(Bites_per_min), # Calculate mean and standard deviation of bites per minute
+            sd_bites = sd(Bites_per_min),
+            n = n())
+
+# One-way ANOVA: Does bite rate differ by species?
+# aov() runs the ANOVA
+# Formula format: continuous_variable ~ grouping_variable
+
+bite_anova <- aov(Bites_per_min ~ Species, data = Bites)
+
+# summary() shows the ANOVA results
+summary(bite_anova)
+
+# Which species are different from eachother?
+# Tukey's Honest Significant Difference test
+# compares every pair of species to each other
+
+TukeyHSD(bite_anova)
+```
+
+## Tukey HSD Results Summary
+
+| Comparison | Difference | p-value | Result |
+|------------|------------|---------|--------|
+| C spilurus vs A triostegus | -19.51 | < 0.001 | Significant |
+| Z cornutus vs A triostegus | -38.35 | < 0.001 | Significant |
+| Z cornutus vs C spilurus | -18.85 | < 0.001 | Significant |
+
+## 2-way ANOVA
+
+```{r}
+# Two-way ANOVA: Does bite rate differ by species AND age class?
+# The * between Species and Age_Class tests:
+#   1. Main effect of Species
+#   2. Main effect of Age_Class
+#   3. Interaction between Species and Age_Class
+
+bite_anova_2way <- aov(Bites_per_min ~ Species * Age_Class, data = Bites)
+
+# View results
+summary(bite_anova_2way)
+```
+
+## Two-Way ANOVA Results: Bite Rate by Species and Age Class
+
+| Effect | Df | Sum Sq | Mean Sq | F value | p-value | Significance |
+|--------|-----|--------|---------|---------|---------|--------------|
+| Species | 2 | 29425 | 14712 | 81.62 | < 0.001 | *** |
+| Age Class | 1 | 3005 | 3005 | 16.67 | < 0.001 | *** |
+| Species × Age Class | 2 | 1055 | 528 | 2.93 | 0.058 | . |
+| Residuals | 114 | 20548 | 180 | | | |
+
+Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05, . p < 0.1
+
+**Summary:** Both species and age class had significant effects on bite rate (p < 0.001). The interaction between species and age class was marginally non-significant (p = 0.058), suggesting the difference between adults and juveniles may vary somewhat across species.
+
+```{r}
+# See mean bite rates for each species AND age class combination
+Bites %>%
+  group_by(Species, Age_Class) %>%
+  summarise(
+    mean_bites = mean(Bites_per_min),
+    sd_bites = sd(Bites_per_min),
+    n = n())
+```
+
+# Time Foraging
+```{r}
+Time_Foraging_clean<- Time_Foraging %>% # clean the data 
+  select( # Select and rename the columns
+    Species,
+    Size = `Size (cm)`,
+    Age_Class = `Age Class`,
+    Mean_Bout_Duration = `Mean Feeding Bout Duration (seconds)`,
+    Bout_Frequency = `Feeding Bout Frequency (Mean per min)`,
+    Prop_Time_Feeding = `Proportion of Time Feeding`)
+Time_Foraging_clean
+
+# Calculate mean proportion of time feeding for each sp- I know this is already in the data but just double checking 
+
+Time_Foraging_clean %>%
+  group_by(Species) %>%
+  summarise(
+    mean_prop_time = mean(Prop_Time_Feeding),
+    sd_prop_time = sd(Prop_Time_Feeding),
+    n = n())
+
+# The pattern is the same as the Bite Rate data -> in table below
+
+# Fix the spelling of C spillurus to match the Bite Rate data
+Time_Foraging_clean <- Time_Foraging_clean %>%
+  mutate(Species = case_when(Species == "C spillurus" ~ "C spilurus", # fix name 
+    TRUE ~ Species))
+
+# Verify the fix
+Time_Foraging_clean %>%
+  group_by(Species) %>%
+  summarise(n = n()) # should be C spilurus w/ n=10
+
+# One-way ANOVA: Does proportion of time feeding differ by species?
+time_forage_anova <- aov(Prop_Time_Feeding ~ Species, data = Time_Foraging_clean)
+
+# View results
+summary(time_forage_anova)
+
+# Tukey's test: Which species differ from each other?
+TukeyHSD(time_forage_anova)
+
+```
+
+## Comparison of Feeding Metrics Across Species (Juveniles Only)
+
+| Species | Mean Bite Rate (bites/min) | SD | Mean Time Foraging (%) | SD | Rank |
+|---------|---------------------------|-----|------------------------|-----|------|
+| A triostegus | 47.9 | 14.6 | 74.8 | 13.3 | Highest |
+| C spilurus | 26.4 | 10.7 | 62.8 | 12.2 | Middle |
+| Z cornutus | 2.5 | 2.5 | 14.6 | 11.9 | Lowest |
+
+**Summary:** Species showed consistent ranking across both feeding metrics. A triostegus (Manini) had the highest bite rate and spent the most time foraging, while Z cornutus (Moorish Idol) had the lowest values for both measures. This suggests that species with higher bite rates also allocate more time to foraging behavior.
+
+
+## Side-by-Side ANOVA Comparison: Bite Rate vs. Time Foraging
+
+| Feeding Metric | Df | Sum Sq | Mean Sq | F value | p-value | Significance |
+|----------------|-----|--------|---------|---------|---------|--------------|
+| Bite Rate | 2 | 29425 | 14712 | 69.95 | < 0.001 | *** |
+| Time Foraging | 2 | 20294 | 10147 | 65.37 | < 0.001 | *** |
+
+Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05
+
+**Summary:** Both bite rate and proportion of time foraging showed highly significant differences among species (p < 0.001). The similar F values (69.95 and 65.37) indicate that species differences are equally strong for both feeding metrics.
+
+
+## Tukey HSD Post-Hoc Comparison: Bite Rate vs. Time Foraging
+
+| Comparison | Bite Rate Diff | Bite Rate p-value | Time Foraging Diff | Time Foraging p-value |
+|------------|----------------|-------------------|--------------------|-----------------------|
+| C spilurus vs A triostegus | -19.51 | < 0.001 *** | -12.07 | 0.096 |
+| Z cornutus vs A triostegus | -38.35 | < 0.001 *** | -60.21 | < 0.001 *** |
+| Z cornutus vs C spilurus | -18.85 | < 0.001 *** | -48.14 | < 0.001 *** |
+
+Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05
+
+**Summary:** All species pairs differed significantly in bite rate (p < 0.001). For time foraging, Z cornutus differed significantly from both A triostegus and C spilurus (p < 0.001), but the difference between A triostegus and C spilurus was not statistically significant (p = 0.096). This suggests that while Manini and Parrotfish have different bite rates, they allocate a similar proportion of their time to foraging.
+
+# T-test 1: A triostegus
+
+```{r}
+# T-test for A triostegus: Adults vs Juveniles
+# t.test() compares the two age classes
+
+t_test_atriostegus <- Bites %>%
+  filter(Species == "A triostegus") %>%
+  t.test(Bites_per_min ~ Age_Class, data = .) # data = . means "use the data that was piped in" 
+
+# View result
+t_test_atriostegus # results are significant 
+```
+
+# T-test 2: C spilurus
+
+```{r}
+# T-test for C spilurus: Adults vs Juveniles
+t_test_cspil <- Bites %>%
+  filter(Species == "C spilurus") %>%
+  t.test(Bites_per_min ~ Age_Class, data = .)
+
+# View result
+t_test_cspil # results are significant 
+```
+
+# T-test 3: Z cornutus 
+
+```{r}
+# T-test for Z cornutus: Adults vs Juveniles
+t_test_zcor<- Bites %>%
+  filter(Species == "Z cornutus") %>%
+  t.test(Bites_per_min ~ Age_Class, data = .)
+
+# View result
+t_test_zcor # results are significant
+```
+
+## Independent T-Test Results: Adults vs. Juveniles by Species (Bite Rate)
+
+| Species | Adult Mean (bites/min) | Juvenile Mean (bites/min) | t-value | df | p-value | Significant? |
+|---------|------------------------|---------------------------|---------|-----|---------|--------------|
+| A triostegus | 31.87 | 47.90 | -2.40 | 29.9 | 0.023 | * |
+| C spilurus | 14.35 | 26.40 | -3.96 | 36.1 | < 0.001 | *** |
+| Z cornutus | 0.56 | 2.50 | -3.32 | 23.8 | 0.003 | ** |
+
+Significance codes: *** p < 0.001, ** p < 0.01, * p < 0.05
+
+**Summary:** Juveniles had significantly higher bite rates than adults in all three species. This pattern was strongest in C spilurus (p < 0.001) and weakest in A triostegus (p = 0.023) (due to high SD). Juvenile fish may feed more frequently due to higher metabolic demands associated with growth.
+
+# Plot- Time Foraging by Species
+
+```{r}
+# Box plot of proportion of time feeding by species
+# Box plot show the median, quartiles, and spread of data
+
+time_forage_plot <- ggplot(data = Time_Foraging_clean, 
+                            mapping = aes(x = Species, 
+                                          y = Prop_Time_Feeding, 
+                                          fill = Species)) +
+  geom_boxplot() +
+  geom_point(position = position_jitter(width = 0.1), alpha = 0.5) + # add individual data points on top of boxes and spread out 
+  scale_fill_viridis_d(option = "plasma") +  # Colorblind-friendly palette
+  labs(  # Add labels
+    title = "Juvenile Foraging Time Allocation \nAcross Three Reef Fish Species",
+    subtitle = "Proportion of observation period spent actively feeding",
+    x = "Species",
+    y = "Proportion of Time Feeding (%)") +
+  theme_bw() +
+  theme(legend.position = "none", # remove legend since species is already on x-axis
+        plot.title = element_text(hjust = 0.5, face = "bold", size = 14), # center titles
+        plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray20"),
+    axis.title = element_text(size = 12), # make title larger
+    axis.text.x = element_text(face = "italic", size = 10)) # italicize sp name 
+
+# Display the plot
+time_forage_plot
+```
+
+# Plot - Bite Rate 
+```{r}
+# Filter bite rate data to juveniles only
+Bites_juveniles <- Bites %>%
+  filter(Age_Class == "Juvenile")
+
+# Box plot of bite rate by species (juveniles only)
+bite_rate_plot <- ggplot(data = Bites_juveniles, 
+                          mapping = aes(x = Species, 
+                                        y = Bites_per_min, 
+                                        fill = Species)) +
+  geom_boxplot() +
+  geom_point(position = position_jitter(width = 0.1), alpha = 0.5) +
+  scale_fill_viridis_d(option = "viridis") +
+  labs(
+    title = "Bite Rate",
+    x = "Species",
+    y = "Bites per Minute") +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    axis.title = element_text(size = 12),
+    axis.text.x = element_text(face = "italic", size = 10))
+
+# Display plot
+bite_rate_plot
+```
+
+# Plot - Combine Bite Rate & Foraging
+```{r}
+# Combine the two plots side by side
+
+combined_plot <- bite_rate_plot + time_forage_plot +
+  plot_annotation( # Add title for combined figure
+    title = "Comparison of Feeding Metrics Across Three Reef Fish Species",
+    theme = theme(
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 16)))
+
+# Display the combined plot
+combined_plot
+```
+
+# Plot - Interaction Plot 
+```{r}
+# Interaction plot
+# plot 2-way anova and t-test results: species differences and adult vs juvenile differences 
+# calculate means and standard errors for each group
+
+interaction_data <- Bites %>%
+  group_by(Species, Age_Class) %>%  # Group by species and age class
+  summarise( # Calculate mean, standard deviation, sample size, and standard error
+    mean_bites = mean(Bites_per_min),
+    sd_bites = sd(Bites_per_min),
+    n = n(),
+    se_bites = sd_bites / sqrt(n)) # Standard error = standard deviation divided by square root of n
+
+# Look at data
+interaction_data
+```
+
+```{r}
+# Interaction plot
+interaction_plot <- ggplot(data = interaction_data, 
+                            mapping = aes(x = Age_Class, 
+                                          y = mean_bites, 
+                                          color = Species,
+                                          group = Species)) +
+  geom_line(linewidth = 1) + # add lines connecting adult to juvenile for each species
+  geom_point(size = 3) +  # Add points for each mean
+  geom_errorbar(aes(ymin = mean_bites - se_bites, # Add error bars (mean ± standard error)
+                    ymax = mean_bites + se_bites),
+                width = 0.1) +
+  scale_color_viridis_d(option = "viridis") + # Colorblind-friendly palette
+  labs( # labels
+    title = "Interaction Between Species and Age Class on Bite Rate",
+    subtitle = "Lines show change from adult to juvenile within each species",
+    x = "Age Class",
+    y = "Mean Bites per Minute (± SE)",
+    color = "Species") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray40"),
+    axis.title = element_text(size = 12),
+    legend.text = element_text(face = "italic"))
+
+# Display the plot
+interaction_plot
+```
+
+
 

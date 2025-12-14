@@ -281,11 +281,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For reference: -value means fish avoid, +value means fish prefer</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Interpreting Results Positive = preference, Negative = avoidance A triostegus:</p>
-<p><strong>Loves</strong> turf algae! Juveniles in the Flats have a selectivity of +90.4! Avoids coral and sand (all negative values) Adults also like rubble in Flats (+69.1)</p>
-<p>C spilurus:</p>
+<p>Interpreting Results Positive = preference, Negative = avoidance</p>
+<p><strong>A triostegus</strong>:</p>
+<p>Loves turf algae. Juveniles in the Flats have a selectivity of +90.4! Avoids coral and sand (all negative values) Adults also like rubble in Flats (+69.1)</p>
+<p><strong>C spilurus</strong>:</p>
 <p>Juveniles love turf (+85.4 in Flats) Adults are more variable — prefer rubble on Slope (+66.9), turf in Lagoon (+41.4), and even sand in Flats (+17.4) Adults on Slope strongly avoid turf (-15.0)</p>
-<p>Z cornutus:</p>
+<p><strong>Z cornutus</strong>:</p>
 <p>Adults on Slope love sponge! (+52.2) Juveniles also eat sponge more than expected (+25.6 on Slope, +13.6 in Lagoon) Juveniles in Lagoon prefer rubble (+46.5) All groups avoid coral (all negative)</p>
 </section>
 <section id="strauss-plot" class="level1">
@@ -313,7 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()<span class="sc">+</span> <span class="co"># bar plot</span></span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>)<span class="sc">+</span> <span class="co"># add horizontal reference line at 0 </span></span>
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Species <span class="sc">+</span> Age_Class <span class="sc">~</span> Location)<span class="sc">+</span> <span class="co"># create separate panels for each species and age class </span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"mako"</span>)<span class="sc">+</span> <span class="co"># color blind friendly </span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"magma"</span>)<span class="sc">+</span> <span class="co"># color blind friendly </span></span>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))<span class="sc">+</span> <span class="co"># rotate axis labels</span></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Strauss Selectivity Index by Species, Age Class, and Location"</span>,</span>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Positive values = preference, Negative values = avoidance"</span>,</span>
@@ -325,6 +326,728 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div>
 <figure class="figure">
 <p><img src="Plots_For_class_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">here</span>(<span class="st">"output"</span>, <span class="st">"strauss_plot.png"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="anova" class="level1">
+<h1>ANOVA</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's see the mean bite rate for each species</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>Bites <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Species) <span class="sc">%&gt;%</span> <span class="co"># Group by species</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_bites =</span> <span class="fu">mean</span>(Bites_per_min), <span class="co"># Calculate mean and standard deviation of bites per minute</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd_bites =</span> <span class="fu">sd</span>(Bites_per_min),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  Species      mean_bites sd_bites     n
+  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+1 A triostegus      39.9     22.3     40
+2 C spilurus        20.4     11.3     40
+3 Z cornutus         1.53     2.07    40</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-way ANOVA: Does bite rate differ by species?</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># aov() runs the ANOVA</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Formula format: continuous_variable ~ grouping_variable</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>bite_anova <span class="ot">&lt;-</span> <span class="fu">aov</span>(Bites_per_min <span class="sc">~</span> Species, <span class="at">data =</span> Bites)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># summary() shows the ANOVA results</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(bite_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Df Sum Sq Mean Sq F value Pr(&gt;F)    
+Species       2  29425   14712   69.95 &lt;2e-16 ***
+Residuals   117  24608     210                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Which species are different from eachother?</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Tukey's Honest Significant Difference test</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># compares every pair of species to each other</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(bite_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Bites_per_min ~ Species, data = Bites)
+
+$Species
+                             diff       lwr       upr p adj
+C spilurus-A triostegus -19.50833 -27.20669 -11.80998 1e-07
+Z cornutus-A triostegus -38.35476 -46.05312 -30.65641 0e+00
+Z cornutus-C spilurus   -18.84643 -26.54478 -11.14807 2e-07</code></pre>
+</div>
+</div>
+<section id="tukey-hsd-results-summary" class="level2">
+<h2 class="anchored" data-anchor-id="tukey-hsd-results-summary">Tukey HSD Results Summary</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Comparison</th>
+<th>Difference</th>
+<th>p-value</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>C spilurus vs A triostegus</td>
+<td>-19.51</td>
+<td>&lt; 0.001</td>
+<td>Significant</td>
+</tr>
+<tr class="even">
+<td>Z cornutus vs A triostegus</td>
+<td>-38.35</td>
+<td>&lt; 0.001</td>
+<td>Significant</td>
+</tr>
+<tr class="odd">
+<td>Z cornutus vs C spilurus</td>
+<td>-18.85</td>
+<td>&lt; 0.001</td>
+<td>Significant</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="way-anova" class="level2">
+<h2 class="anchored" data-anchor-id="way-anova">2-way ANOVA</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Two-way ANOVA: Does bite rate differ by species AND age class?</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The * between Species and Age_Class tests:</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   1. Main effect of Species</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   2. Main effect of Age_Class</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   3. Interaction between Species and Age_Class</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>bite_anova_2way <span class="ot">&lt;-</span> <span class="fu">aov</span>(Bites_per_min <span class="sc">~</span> Species <span class="sc">*</span> Age_Class, <span class="at">data =</span> Bites)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(bite_anova_2way)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+Species             2  29425   14712  81.624  &lt; 2e-16 ***
+Age_Class           1   3005    3005  16.673 8.28e-05 ***
+Species:Age_Class   2   1055     528   2.927   0.0576 .  
+Residuals         114  20548     180                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="two-way-anova-results-bite-rate-by-species-and-age-class" class="level2">
+<h2 class="anchored" data-anchor-id="two-way-anova-results-bite-rate-by-species-and-age-class">Two-Way ANOVA Results: Bite Rate by Species and Age Class</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Effect</th>
+<th>Df</th>
+<th>Sum Sq</th>
+<th>Mean Sq</th>
+<th>F value</th>
+<th>p-value</th>
+<th>Significance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Species</td>
+<td>2</td>
+<td>29425</td>
+<td>14712</td>
+<td>81.62</td>
+<td>&lt; 0.001</td>
+<td>***</td>
+</tr>
+<tr class="even">
+<td>Age Class</td>
+<td>1</td>
+<td>3005</td>
+<td>3005</td>
+<td>16.67</td>
+<td>&lt; 0.001</td>
+<td>***</td>
+</tr>
+<tr class="odd">
+<td>Species × Age Class</td>
+<td>2</td>
+<td>1055</td>
+<td>528</td>
+<td>2.93</td>
+<td>0.058</td>
+<td>.</td>
+</tr>
+<tr class="even">
+<td>Residuals</td>
+<td>114</td>
+<td>20548</td>
+<td>180</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Significance codes: *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05, . p &lt; 0.1</p>
+<p><strong>Summary:</strong> Both species and age class had significant effects on bite rate (p &lt; 0.001). The interaction between species and age class was marginally non-significant (p = 0.058), suggesting the difference between adults and juveniles may vary somewhat across species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># See mean bite rates for each species AND age class combination</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>Bites <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Species, Age_Class) <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_bites =</span> <span class="fu">mean</span>(Bites_per_min),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_bites =</span> <span class="fu">sd</span>(Bites_per_min),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'Species'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 5
+# Groups:   Species [3]
+  Species      Age_Class mean_bites sd_bites     n
+  &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+1 A triostegus Adult         31.9     26.0      20
+2 A triostegus Juvenile      47.9     14.6      20
+3 C spilurus   Adult         14.4      8.45     20
+4 C spilurus   Juvenile      26.4     10.7      20
+5 Z cornutus   Adult          0.557    0.885    20
+6 Z cornutus   Juvenile       2.5      2.46     20</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="time-foraging" class="level1">
+<h1>Time Foraging</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>Time_Foraging_clean<span class="ot">&lt;-</span> Time_Foraging <span class="sc">%&gt;%</span> <span class="co"># clean the data </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>( <span class="co"># Select and rename the columns</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    Species,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Size =</span> <span class="st">`</span><span class="at">Size (cm)</span><span class="st">`</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Age_Class =</span> <span class="st">`</span><span class="at">Age Class</span><span class="st">`</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean_Bout_Duration =</span> <span class="st">`</span><span class="at">Mean Feeding Bout Duration (seconds)</span><span class="st">`</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Bout_Frequency =</span> <span class="st">`</span><span class="at">Feeding Bout Frequency (Mean per min)</span><span class="st">`</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Prop_Time_Feeding =</span> <span class="st">`</span><span class="at">Proportion of Time Feeding</span><span class="st">`</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>Time_Foraging_clean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 30 × 6
+   Species    Size Age_Class Mean_Bout_Duration Bout_Frequency Prop_Time_Feeding
+   &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt;          &lt;dbl&gt;             &lt;dbl&gt;
+ 1 Z cornut…   8   Juvenile                1.3           0.42               0.91
+ 2 Z cornut…   8.5 Juvenile                3.2           0.714              3.81
+ 3 Z cornut…  10   Juvenile                7.5           1.14              14.2 
+ 4 Z cornut…   7   Juvenile                1.3           0.42               0.91
+ 5 Z cornut…   9.5 Juvenile                6.8           1.42              16.1 
+ 6 Z cornut…   9   Juvenile                6.25          1.14              11.9 
+ 7 Z cornut…   6.5 Juvenile               11             0.714             13.1 
+ 8 Z cornut…   7   Juvenile               12.7           0.86              18.1 
+ 9 Z cornut…   6.5 Juvenile               25.2           0.714             30.0 
+10 Z cornut…   5.5 Juvenile               22.4           1                 37.3 
+# ℹ 20 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate mean proportion of time feeding for each sp- I know this is already in the data but just double checking </span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>Time_Foraging_clean <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Species) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_prop_time =</span> <span class="fu">mean</span>(Prop_Time_Feeding),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_prop_time =</span> <span class="fu">sd</span>(Prop_Time_Feeding),</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  Species      mean_prop_time sd_prop_time     n
+  &lt;chr&gt;                 &lt;dbl&gt;        &lt;dbl&gt; &lt;int&gt;
+1 A triostegus           74.8         13.3    10
+2 C spillurus            62.8         12.2    10
+3 Z cornutus             14.6         11.9    10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The pattern is the same as the Bite Rate data -&gt; in table below</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix the spelling of C spillurus to match the Bite Rate data</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>Time_Foraging_clean <span class="ot">&lt;-</span> Time_Foraging_clean <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Species =</span> <span class="fu">case_when</span>(Species <span class="sc">==</span> <span class="st">"C spillurus"</span> <span class="sc">~</span> <span class="st">"C spilurus"</span>, <span class="co"># fix name </span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> Species))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify the fix</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>Time_Foraging_clean <span class="sc">%&gt;%</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Species) <span class="sc">%&gt;%</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="co"># should be C spilurus w/ n=10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  Species          n
+  &lt;chr&gt;        &lt;int&gt;
+1 A triostegus    10
+2 C spilurus      10
+3 Z cornutus      10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-way ANOVA: Does proportion of time feeding differ by species?</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>time_forage_anova <span class="ot">&lt;-</span> <span class="fu">aov</span>(Prop_Time_Feeding <span class="sc">~</span> Species, <span class="at">data =</span> Time_Foraging_clean)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(time_forage_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+Species      2  20294   10147   65.37 4.48e-11 ***
+Residuals   27   4191     155                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tukey's test: Which species differ from each other?</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(time_forage_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Prop_Time_Feeding ~ Species, data = Time_Foraging_clean)
+
+$Species
+                             diff       lwr        upr     p adj
+C spilurus-A triostegus -12.06758 -25.88254   1.747377 0.0955794
+Z cornutus-A triostegus -60.20797 -74.02293 -46.393007 0.0000000
+Z cornutus-C spilurus   -48.14038 -61.95534 -34.325423 0.0000000</code></pre>
+</div>
+</div>
+<section id="comparison-of-feeding-metrics-across-species-juveniles-only" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-of-feeding-metrics-across-species-juveniles-only">Comparison of Feeding Metrics Across Species (Juveniles Only)</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 35%">
+<col style="width: 6%">
+<col style="width: 31%">
+<col style="width: 6%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Species</th>
+<th>Mean Bite Rate (bites/min)</th>
+<th>SD</th>
+<th>Mean Time Foraging (%)</th>
+<th>SD</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A triostegus</td>
+<td>47.9</td>
+<td>14.6</td>
+<td>74.8</td>
+<td>13.3</td>
+<td>Highest</td>
+</tr>
+<tr class="even">
+<td>C spilurus</td>
+<td>26.4</td>
+<td>10.7</td>
+<td>62.8</td>
+<td>12.2</td>
+<td>Middle</td>
+</tr>
+<tr class="odd">
+<td>Z cornutus</td>
+<td>2.5</td>
+<td>2.5</td>
+<td>14.6</td>
+<td>11.9</td>
+<td>Lowest</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Summary:</strong> Species showed consistent ranking across both feeding metrics. A triostegus (Manini) had the highest bite rate and spent the most time foraging, while Z cornutus (Moorish Idol) had the lowest values for both measures. This suggests that species with higher bite rates also allocate more time to foraging behavior.</p>
+</section>
+<section id="side-by-side-anova-comparison-bite-rate-vs.-time-foraging" class="level2">
+<h2 class="anchored" data-anchor-id="side-by-side-anova-comparison-bite-rate-vs.-time-foraging">Side-by-Side ANOVA Comparison: Bite Rate vs.&nbsp;Time Foraging</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feeding Metric</th>
+<th>Df</th>
+<th>Sum Sq</th>
+<th>Mean Sq</th>
+<th>F value</th>
+<th>p-value</th>
+<th>Significance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bite Rate</td>
+<td>2</td>
+<td>29425</td>
+<td>14712</td>
+<td>69.95</td>
+<td>&lt; 0.001</td>
+<td>***</td>
+</tr>
+<tr class="even">
+<td>Time Foraging</td>
+<td>2</td>
+<td>20294</td>
+<td>10147</td>
+<td>65.37</td>
+<td>&lt; 0.001</td>
+<td>***</td>
+</tr>
+</tbody>
+</table>
+<p>Significance codes: *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</p>
+<p><strong>Summary:</strong> Both bite rate and proportion of time foraging showed highly significant differences among species (p &lt; 0.001). The similar F values (69.95 and 65.37) indicate that species differences are equally strong for both feeding metrics.</p>
+</section>
+<section id="tukey-hsd-post-hoc-comparison-bite-rate-vs.-time-foraging" class="level2">
+<h2 class="anchored" data-anchor-id="tukey-hsd-post-hoc-comparison-bite-rate-vs.-time-foraging">Tukey HSD Post-Hoc Comparison: Bite Rate vs.&nbsp;Time Foraging</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 17%">
+<col style="width: 21%">
+<col style="width: 22%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Comparison</th>
+<th>Bite Rate Diff</th>
+<th>Bite Rate p-value</th>
+<th>Time Foraging Diff</th>
+<th>Time Foraging p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>C spilurus vs A triostegus</td>
+<td>-19.51</td>
+<td>&lt; 0.001 ***</td>
+<td>-12.07</td>
+<td>0.096</td>
+</tr>
+<tr class="even">
+<td>Z cornutus vs A triostegus</td>
+<td>-38.35</td>
+<td>&lt; 0.001 ***</td>
+<td>-60.21</td>
+<td>&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td>Z cornutus vs C spilurus</td>
+<td>-18.85</td>
+<td>&lt; 0.001 ***</td>
+<td>-48.14</td>
+<td>&lt; 0.001 ***</td>
+</tr>
+</tbody>
+</table>
+<p>Significance codes: *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</p>
+<p><strong>Summary:</strong> All species pairs differed significantly in bite rate (p &lt; 0.001). For time foraging, Z cornutus differed significantly from both A triostegus and C spilurus (p &lt; 0.001), but the difference between A triostegus and C spilurus was not statistically significant (p = 0.096). This suggests that while Manini and Parrotfish have different bite rates, they allocate a similar proportion of their time to foraging.</p>
+</section>
+</section>
+<section id="t-test-1-a-triostegus" class="level1">
+<h1>T-test 1: A triostegus</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># T-test for A triostegus: Adults vs Juveniles</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="co"># t.test() compares the two age classes</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>t_test_atriostegus <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Species <span class="sc">==</span> <span class="st">"A triostegus"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t.test</span>(Bites_per_min <span class="sc">~</span> Age_Class, <span class="at">data =</span> .) <span class="co"># data = . means "use the data that was piped in" </span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="co"># View result</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>t_test_atriostegus <span class="co"># results are significant </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  Bites_per_min by Age_Class
+t = -2.4046, df = 29.882, p-value = 0.02259
+alternative hypothesis: true difference in means between group Adult and group Juvenile is not equal to 0
+95 percent confidence interval:
+ -29.652846  -2.413821
+sample estimates:
+   mean in group Adult mean in group Juvenile 
+              31.86667               47.90000 </code></pre>
+</div>
+</div>
+</section>
+<section id="t-test-2-c-spilurus" class="level1">
+<h1>T-test 2: C spilurus</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># T-test for C spilurus: Adults vs Juveniles</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>t_test_cspil <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Species <span class="sc">==</span> <span class="st">"C spilurus"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t.test</span>(Bites_per_min <span class="sc">~</span> Age_Class, <span class="at">data =</span> .)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="co"># View result</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>t_test_cspil <span class="co"># results are significant </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  Bites_per_min by Age_Class
+t = -3.9571, df = 36.1, p-value = 0.0003405
+alternative hypothesis: true difference in means between group Adult and group Juvenile is not equal to 0
+95 percent confidence interval:
+ -18.225326  -5.874674
+sample estimates:
+   mean in group Adult mean in group Juvenile 
+                 14.35                  26.40 </code></pre>
+</div>
+</div>
+</section>
+<section id="t-test-3-z-cornutus" class="level1">
+<h1>T-test 3: Z cornutus</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># T-test for Z cornutus: Adults vs Juveniles</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>t_test_zcor<span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Species <span class="sc">==</span> <span class="st">"Z cornutus"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t.test</span>(Bites_per_min <span class="sc">~</span> Age_Class, <span class="at">data =</span> .)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="co"># View result</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>t_test_zcor <span class="co"># results are significant</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  Bites_per_min by Age_Class
+t = -3.3215, df = 23.835, p-value = 0.002876
+alternative hypothesis: true difference in means between group Adult and group Juvenile is not equal to 0
+95 percent confidence interval:
+ -3.1505440 -0.7351703
+sample estimates:
+   mean in group Adult mean in group Juvenile 
+             0.5571429              2.5000000 </code></pre>
+</div>
+</div>
+<section id="independent-t-test-results-adults-vs.-juveniles-by-species-bite-rate" class="level2">
+<h2 class="anchored" data-anchor-id="independent-t-test-results-adults-vs.-juveniles-by-species-bite-rate">Independent T-Test Results: Adults vs.&nbsp;Juveniles by Species (Bite Rate)</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 24%">
+<col style="width: 27%">
+<col style="width: 9%">
+<col style="width: 5%">
+<col style="width: 9%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Species</th>
+<th>Adult Mean (bites/min)</th>
+<th>Juvenile Mean (bites/min)</th>
+<th>t-value</th>
+<th>df</th>
+<th>p-value</th>
+<th>Significant?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A triostegus</td>
+<td>31.87</td>
+<td>47.90</td>
+<td>-2.40</td>
+<td>29.9</td>
+<td>0.023</td>
+<td>*</td>
+</tr>
+<tr class="even">
+<td>C spilurus</td>
+<td>14.35</td>
+<td>26.40</td>
+<td>-3.96</td>
+<td>36.1</td>
+<td>&lt; 0.001</td>
+<td>***</td>
+</tr>
+<tr class="odd">
+<td>Z cornutus</td>
+<td>0.56</td>
+<td>2.50</td>
+<td>-3.32</td>
+<td>23.8</td>
+<td>0.003</td>
+<td>**</td>
+</tr>
+</tbody>
+</table>
+<p>Significance codes: *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</p>
+<p><strong>Summary:</strong> Juveniles had significantly higher bite rates than adults in all three species. This pattern was strongest in C spilurus (p &lt; 0.001) and weakest in A triostegus (p = 0.023) (due to high SD). Juvenile fish may feed more frequently due to higher metabolic demands associated with growth.</p>
+</section>
+</section>
+<section id="plot--time-foraging-by-species" class="level1">
+<h1>Plot- Time Foraging by Species</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Box plot of proportion of time feeding by species</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Box plot show the median, quartiles, and spread of data</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>time_forage_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> Time_Foraging_clean, </span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Species, </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">y =</span> Prop_Time_Feeding, </span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">fill =</span> Species)) <span class="sc">+</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="co"># add individual data points on top of boxes and spread out </span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"plasma"</span>) <span class="sc">+</span>  <span class="co"># Colorblind-friendly palette</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(  <span class="co"># Add labels</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Juvenile Foraging Time Allocation </span><span class="sc">\n</span><span class="st">Across Three Reef Fish Species"</span>,</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Proportion of observation period spent actively feeding"</span>,</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Species"</span>,</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proportion of Time Feeding (%)"</span>) <span class="sc">+</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>, <span class="co"># remove legend since species is already on x-axis</span></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>), <span class="co"># center titles</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">11</span>, <span class="at">color =</span> <span class="st">"gray20"</span>),</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>), <span class="co"># make title larger</span></span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"italic"</span>, <span class="at">size =</span> <span class="dv">10</span>)) <span class="co"># italicize sp name </span></span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the plot</span></span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>time_forage_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Plots_For_class_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot---bite-rate" class="level1">
+<h1>Plot - Bite Rate</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter bite rate data to juveniles only</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>Bites_juveniles <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Age_Class <span class="sc">==</span> <span class="st">"Juvenile"</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Box plot of bite rate by species (juveniles only)</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>bite_rate_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> Bites_juveniles, </span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Species, </span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">y =</span> Bites_per_min, </span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">fill =</span> Species)) <span class="sc">+</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"viridis"</span>) <span class="sc">+</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Bite Rate"</span>,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Species"</span>,</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Bites per Minute"</span>) <span class="sc">+</span></span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"italic"</span>, <span class="at">size =</span> <span class="dv">10</span>))</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Display plot</span></span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>bite_rate_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Plots_For_class_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot---combine-bite-rate-foraging" class="level1">
+<h1>Plot - Combine Bite Rate &amp; Foraging</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine the two plots side by side</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>combined_plot <span class="ot">&lt;-</span> bite_rate_plot <span class="sc">+</span> time_forage_plot <span class="sc">+</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>( <span class="co"># Add title for combined figure</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Comparison of Feeding Metrics Across Three Reef Fish Species"</span>,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">theme =</span> <span class="fu">theme</span>(</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">16</span>)))</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the combined plot</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>combined_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Plots_For_class_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot---interaction-plot" class="level1">
+<h1>Plot - Interaction Plot</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interaction plot</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot 2-way anova and t-test results: species differences and adult vs juvenile differences </span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate means and standard errors for each group</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>interaction_data <span class="ot">&lt;-</span> Bites <span class="sc">%&gt;%</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Species, Age_Class) <span class="sc">%&gt;%</span>  <span class="co"># Group by species and age class</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>( <span class="co"># Calculate mean, standard deviation, sample size, and standard error</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_bites =</span> <span class="fu">mean</span>(Bites_per_min),</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd_bites =</span> <span class="fu">sd</span>(Bites_per_min),</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">se_bites =</span> sd_bites <span class="sc">/</span> <span class="fu">sqrt</span>(n)) <span class="co"># Standard error = standard deviation divided by square root of n</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'Species'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at data</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>interaction_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 6
+# Groups:   Species [3]
+  Species      Age_Class mean_bites sd_bites     n se_bites
+  &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
+1 A triostegus Adult         31.9     26.0      20    5.82 
+2 A triostegus Juvenile      47.9     14.6      20    3.26 
+3 C spilurus   Adult         14.4      8.45     20    1.89 
+4 C spilurus   Juvenile      26.4     10.7      20    2.39 
+5 Z cornutus   Adult          0.557    0.885    20    0.198
+6 Z cornutus   Juvenile       2.5      2.46     20    0.550</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interaction plot</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>interaction_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> interaction_data, </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> Age_Class, </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">y =</span> mean_bites, </span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">color =</span> Species,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">group =</span> Species)) <span class="sc">+</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="co"># add lines connecting adult to juvenile for each species</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Add points for each mean</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> mean_bites <span class="sc">-</span> se_bites, <span class="co"># Add error bars (mean ± standard error)</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> mean_bites <span class="sc">+</span> se_bites),</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>(<span class="at">option =</span> <span class="st">"viridis"</span>) <span class="sc">+</span> <span class="co"># Colorblind-friendly palette</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( <span class="co"># labels</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Interaction Between Species and Age Class on Bite Rate"</span>,</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Lines show change from adult to juvenile within each species"</span>,</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Age Class"</span>,</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Mean Bites per Minute (± SE)"</span>,</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Species"</span>) <span class="sc">+</span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">11</span>, <span class="at">color =</span> <span class="st">"gray40"</span>),</span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"italic"</span>))</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the plot</span></span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>interaction_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Plots_For_class_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
