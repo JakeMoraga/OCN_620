@@ -238,7 +238,7 @@ ggsave(here("output", "strauss_plot.png"))
 # Conspecific Substrate Preference (Juv vs adult)
 
 ```{r}
-# comparing the substrate preference for juveniles and adults for the same species to answer hypothesis 2 better
+# comparing the substrate preference for juveniles and adults for the same species to answer hypothesis 2 better, only using preferences which came out to 3 per species
 
 bite_proportions <- Bites %>%
   mutate(
@@ -281,29 +281,21 @@ strauss_zcorn <- strauss_results_indv %>%
 view(strauss_atrio)
 
 
-t.test(Coral_L ~ Age_Class, data = strauss_atrio)
+
 t.test(Rubble_L ~ Age_Class, data = strauss_atrio)
-t.test(Sand_L ~ Age_Class, data = strauss_atrio)
 t.test(Turf_L ~ Age_Class, data = strauss_atrio)
 t.test(Macro_L ~ Age_Class, data = strauss_atrio)
-t.test(Sponge_L ~ Age_Class, data = strauss_atrio)
-t.test(CCA_L ~ Age_Class, data = strauss_atrio)
 
-t.test(Coral_L ~ Age_Class, data = strauss_cspil)
+
 t.test(Rubble_L ~ Age_Class, data = strauss_cspil)
 t.test(Sand_L ~ Age_Class, data = strauss_cspil)
 t.test(Turf_L ~ Age_Class, data = strauss_cspil)
-t.test(Macro_L ~ Age_Class, data = strauss_cspil)
-t.test(Sponge_L ~ Age_Class, data = strauss_cspil)
-t.test(CCA_L ~ Age_Class, data = strauss_cspil)
 
-t.test(Coral_L ~ Age_Class, data = strauss_zcorn)
+
 t.test(Rubble_L ~ Age_Class, data = strauss_zcorn)
-t.test(Sand_L ~ Age_Class, data = strauss_zcorn)
 t.test(Turf_L ~ Age_Class, data = strauss_zcorn)
-t.test(Macro_L ~ Age_Class, data = strauss_zcorn)
 t.test(Sponge_L ~ Age_Class, data = strauss_zcorn)
-t.test(CCA_L ~ Age_Class, data = strauss_zcorn)
+
 
 
 ```
@@ -313,38 +305,28 @@ t.test(CCA_L ~ Age_Class, data = strauss_zcorn)
 
 | Substrate   | t statistic | df     | p‑value  | 95% CI (lower) | 95% CI (upper) | Mean Adult | Mean Juvenile |
 |-------------|-------------|--------|----------|----------------|----------------|------------|---------------|
-| Coral_L     | −1.2734     | 35.968 | 0.2111   | −12.288        | 2.809          | −23.046    | −18.307       |
 | Rubble_L    | 1.7443      | 36.368 | 0.0896   | −4.253         | 56.672         | 38.298     | 12.088        |
-| Sand_L      | 0.1654      | 35.975 | 0.8696   | −1.751         | 2.062          | −39.868    | −40.024       |
 | Turf_L      | −2.0783     | 36.279 | 0.0448   | −60.349        | −0.746         | 18.928     | 49.475        |
 | Macro_L     | 1.4270      | 18.380 | 0.1704   | −4.077         | 21.419         | 7.400      | −1.272        |
-| Sponge_L    | NaN         | NaN    | NA       | NaN            | NaN            | 0.000      | 0.000         |
-| CCA_L       | 0.8063      | 35.862 | 0.4254   | −0.380         | 0.882          | −1.711     | −1.961        |
+
 
 # C spil conspecific substrate differences (adult vs juvenile)
 
-| Substrate   | t statistic | df     | p‑value   | 95% CI (lower) | 95% CI (upper) | Mean Adult | Mean Juvenile |
-|-------------|-------------|--------|-----------|----------------|----------------|------------|---------------|
-| Coral_L     | 1.6908      | 29.779 | 0.1013    | −1.929         | 20.455         | −15.810    | −25.073       |
-| Rubble_L    | 1.6118      | 35.510 | 0.1159    | −5.009         | 43.699         | 21.902     | 2.557         |
-| Sand_L      | 2.9436      | 22.197 | 0.0075    | 5.307          | 30.571         | −19.713    | −37.652       |
-| Turf_L      | −3.0699     | 37.950 | 0.0039    | −69.288        | −14.219        | 20.529     | 62.283        |
-| Macro_L     | −3.5362     | 37.188 | 0.0011    | −2.811         | −0.763         | −2.575     | −0.787        |
-| Sponge_L    | −2.8536     | 19.000 | 0.0102    | −1.733         | −0.267         | −1.000     | 0.000         |
-| CCA_L       | −4.4830     | 29.574 | 0.0001    | −2.920         | −1.091         | −3.333     | −1.328        |
+| Substrate   | t statistic | df     | p‑value  | 95% CI (lower) | 95% CI (upper) | Mean Adult | Mean Juvenile |
+|-------------|-------------|--------|----------|----------------|----------------|------------|---------------|
+| Rubble_L    | 1.6118      | 35.510 | 0.1159   | −5.009         | 43.699         | 21.902     | 2.557         |
+| Sand_L      | 2.9436      | 22.197 | 0.0075   | 5.307          | 30.571         | −19.713    | −37.652       |
+| Turf_L      | −3.0699     | 37.950 | 0.0039   | −69.288        | −14.219        | 20.529     | 62.283        |
+
 
 
 # Z corn conspecific substrate differences (adult vs juvenile)
 
-| Substrate   | t statistic | df     | p‑value   | 95% CI (lower) | 95% CI (upper) | Mean Adult | Mean Juvenile |
-|-------------|-------------|--------|-----------|----------------|----------------|------------|---------------|
-| Coral_L     | −0.4355     | 16.505 | 0.6688    | −24.723        | 16.279         | −30.218    | −25.996       |
-| Rubble_L    | −1.5311     | 23.198 | 0.1393    | −51.276        | 7.645          | 2.500      | 24.316        |
-| Sand_L      | 2.9403      | 28.859 | 0.0064    | 3.488          | 19.440         | −15.625    | −27.089       |
-| Turf_L      | −0.0037     | 24.970 | 0.9971    | −28.293        | 28.192         | 19.087     | 19.137        |
-| Macro_L     | −3.0719     | 28.749 | 0.0046    | −1.230         | −0.247         | −4.028     | −3.289        |
-| Sponge_L    | 1.3999      | 16.393 | 0.1802    | −8.178         | 40.161         | 27.729     | 11.738        |
-
+| Substrate   | t statistic | df     | p‑value  | 95% CI (lower) | 95% CI (upper) | Mean Adult | Mean Juvenile |
+|-------------|-------------|--------|----------|----------------|----------------|------------|---------------|
+| Rubble_L    | −1.5311     | 23.198 | 0.1393   | −51.276        | 7.645          | 2.500      | 24.316        |
+| Turf_L      | −0.0037     | 24.970 | 0.9971   | −28.293        | 28.192         | 19.087     | 19.137        |
+| Sponge_L    | 1.3999      | 16.393 | 0.1802   | −8.178         | 40.161         | 27.729     | 11.738        |
 
 
 # ANOVA
