@@ -329,6 +329,142 @@ t.test(Sponge_L ~ Age_Class, data = strauss_zcorn)
 | Sponge_L    | 1.3999      | 16.393 | 0.1802   | −8.178         | 40.161         | 27.729     | 11.738        |
 
 
+# Heterospecific Substrate preferences (Juveniles and adults)
+
+```{r}
+#With this I will compare the substrate preferences of juveniles across species and adults across species
+Juvenile <- strauss_results_indv %>% filter(Age_Class == "Juvenile") %>%
+  drop_na()
+
+Adult <- strauss_results_indv %>% filter(Age_Class == "Adult") %>%
+  drop_na() 
+
+
+#Juveniles
+# Rubble_L
+rubble_aov_j <- aov(Rubble_L ~ Species, data = Juvenile)
+summary(rubble_aov_j)
+TukeyHSD(rubble_aov_j)
+
+# Sand_L
+sand_aov_j <- aov(Sand_L ~ Species, data = Juvenile)
+summary(sand_aov_j)
+TukeyHSD(sand_aov_j)
+
+# Turf_L
+turf_aov_j <- aov(Turf_L ~ Species, data = Juvenile)
+summary(turf_aov_j)
+TukeyHSD(turf_aov_j)
+
+# Macro_L
+macro_aov_j <- aov(Macro_L ~ Species, data = Juvenile)
+summary(macro_aov_j)
+TukeyHSD(macro_aov_j)
+
+# Sponge_L
+sponge_aov_j <- aov(Sponge_L ~ Species, data = Juvenile)
+summary(sponge_aov_j)
+TukeyHSD(sponge_aov_j)
+
+
+
+#Adults
+# Rubble_L
+rubble_aov <- aov(Rubble_L ~ Species, data = Adult)
+summary(rubble_aov)
+TukeyHSD(rubble_aov)
+
+# Sand_L
+sand_aov <- aov(Sand_L ~ Species, data = Adult)
+summary(sand_aov)
+TukeyHSD(sand_aov)
+
+# Turf_L
+turf_aov <- aov(Turf_L ~ Species, data = Adult)
+summary(turf_aov)
+TukeyHSD(turf_aov)
+
+# Macro_L
+macro_aov <- aov(Macro_L ~ Species, data = Adult)
+summary(macro_aov)
+TukeyHSD(macro_aov)
+
+# Sponge_L
+sponge_aov <- aov(Sponge_L ~ Species, data = Adult)
+summary(sponge_aov)
+TukeyHSD(sponge_aov)
+
+
+
+```
+
+# Anova Heterospecific juvenile species substrate preference
+| Substrate   | Df (Species) | Sum Sq (Species) | Mean Sq (Species) | F value | Pr(>F)   | Significance |
+|-------------|--------------|------------------|-------------------|---------|----------|--------------|
+| Rubble_L    | 2            | 4628             | 2314              | 1.529   | 0.226    | n.s.         |
+| Sand_L      | 2            | 1834             | 917.1             | 11.05   | 9.04e-05 | ***          |
+| Turf_L      | 2            | 19029            | 9515              | 4.768   | 0.0122   | *            |
+| Macro_L     | 2            | 68.14            | 34.07             | 8.85    | 0.000457 | ***          |
+| Sponge_L    | 2            | 1775             | 887.3             | 5.705   | 0.00556  | **           |
+
+*** = p < 0.001      ** = p < 0.01      * = p < 0.05      . = p < 0.1 (trend) 
+
+Significant differences mean that they did not both share/ like feeding on the substrate
+
+# Tukey Heterospecific juvenile species substrate preference
+| Substrate | Comparison              | Difference | Lower CI  | Upper CI  | Adjusted p-value | Significance |
+|-----------|-------------------------|------------|-----------|-----------|------------------|--------------|
+| Rubble_L  | C. spilurus – A. triostegus | -9.53      | -39.15    | 20.09     | 0.7200           | n.s.         |
+| Rubble_L  | Z. cornutus – A. triostegus | 12.23      | -17.78    | 42.24     | 0.5918           | n.s.         |
+| Rubble_L  | Z. cornutus – C. spilurus   | 21.76      | -8.25     | 51.77     | 0.1975           | n.s.         |
+| Sand_L    | C. spilurus – A. triostegus | 2.37       | -4.57     | 9.31      | 0.6903           | n.s.         |
+| Sand_L    | Z. cornutus – A. triostegus | 12.93      | 5.91      | 19.96     | 0.00013          | ***          |
+| Sand_L    | Z. cornutus – C. spilurus   | 10.56      | 3.53      | 17.59     | 0.00182          | **           |
+| Turf_L    | C. spilurus – A. triostegus | 12.81      | -21.20    | 46.82     | 0.6384           | n.s.         |
+| Turf_L    | Z. cornutus – A. triostegus | -30.34     | -64.79    | 4.12      | 0.0949           | . (trend)    |
+| Turf_L    | Z. cornutus – C. spilurus   | -43.15     | -77.60    | -8.69     | 0.0106           | *            |
+| Macro_L   | C. spilurus – A. triostegus | 0.48       | -1.01     | 1.98      | 0.7164           | n.s.         |
+| Macro_L   | Z. cornutus – A. triostegus | -2.02      | -3.53     | -0.50     | 0.00613          | **           |
+| Macro_L   | Z. cornutus – C. spilurus   | -2.50      | -4.02     | -0.99     | 0.00058          | ***          |
+| Sponge_L  | C. spilurus – A. triostegus | ~0.00      | -9.50     | 9.50      | 1.0000           | n.s.         |
+| Sponge_L  | Z. cornutus – A. triostegus | 11.74      | 2.12      | 21.36     | 0.0131           | *            |
+| Sponge_L  | Z. cornutus – C. spilurus   | 11.74      | 2.12      | 21.36     | 0.0131           | *            |
+
+
+# Anova Heterospecific adult species substrate preference
+| Substrate   | Df (Species) | Sum Sq (Species) | Mean Sq (Species) | F value | Pr(>F)    | Significance |
+|-------------|--------------|------------------|-------------------|---------|-----------|--------------|
+| Rubble_L    | 2            | 9504             | 4752              | 2.428   | 0.099     | . (trend)    |
+| Sand_L      | 2            | 5733             | 2866.5            | 9.916   | 0.000249  | ***          |
+| Turf_L      | 2            | 29               | 14.5              | 0.009   | 0.991     | n.s.         |
+| Macro_L     | 2            | 1335             | 667.5             | 2.555   | 0.0882    | . (trend)    |
+| Sponge_L    | 2            | 7329             | 3664              | 12.64   | 3.88e-05  | ***          |
+
+  
+*** = p < 0.001      ** = p < 0.01      * = p < 0.05      . = p < 0.1 (trend) 
+
+
+# Tukey Heterospecific adult species substrate preference
+
+| Substrate | Comparison              | Difference | Lower CI  | Upper CI  | Adjusted p-value | Significance |
+|-----------|-------------------------|------------|-----------|-----------|------------------|--------------|
+| Rubble_L  | C. spilurus – A. triostegus | -16.40     | -50.67    | 17.88     | 0.4844           | n.s.         |
+| Rubble_L  | Z. cornutus – A. triostegus | -35.80     | -75.25    | 3.65      | 0.0823           | . (trend)    |
+| Rubble_L  | Z. cornutus – C. spilurus   | -19.40     | -58.47    | 19.66     | 0.4583           | n.s.         |
+| Sand_L    | C. spilurus – A. triostegus | 20.16      | 6.98      | 33.33     | 0.0016           | **           |
+| Sand_L    | Z. cornutus – A. triostegus | 24.24      | 9.08      | 39.41     | 0.00095          | ***          |
+| Sand_L    | Z. cornutus – C. spilurus   | 4.09       | -10.93    | 19.10     | 0.7885           | n.s.         |
+| Turf_L    | C. spilurus – A. triostegus | 1.60       | -29.80    | 33.01     | 0.9917           | n.s.         |
+| Turf_L    | Z. cornutus – A. triostegus | 0.16       | -35.99    | 36.31     | 0.9999           | n.s.         |
+| Turf_L    | Z. cornutus – C. spilurus   | -1.44      | -37.24    | 34.35     | 0.9948           | n.s.         |
+| Macro_L   | C. spilurus – A. triostegus | -9.97      | -22.50    | 2.55      | 0.1423           | n.s.         |
+| Macro_L   | Z. cornutus – A. triostegus | -11.43     | -25.84    | 2.99      | 0.1448           | n.s.         |
+| Macro_L   | Z. cornutus – C. spilurus   | -1.45      | -15.73    | 12.82     | 0.9672           | n.s.         |
+| Sponge_L  | C. spilurus – A. triostegus | -1.00      | -14.19    | 12.19     | 0.9816           | n.s.         |
+| Sponge_L  | Z. cornutus – A. triostegus | 27.73      | 12.55     | 42.91     | 0.00017          | ***          |
+| Sponge_L  | Z. cornutus – C. spilurus   | 28.73      | 13.70     | 43.76     | 0.00008          | ***          |
+
+
 # ANOVA
 
 ```{r}
